@@ -1,5 +1,5 @@
 # Use an official Node.js runtime as the base image
-FROM node:16
+FROM node:20-alpine AS builder
 
 # Set the working directory in the container
 WORKDIR /app
@@ -14,7 +14,28 @@ RUN npm install
 COPY . .
 
 # Expose the port the app runs on
+# Build the application
+RUN npm run build
+
+FROM node:20-alpine
+
+
+RUN npm install -g serve
+
+WORKDIR /app
+
+
+COPY --from=builder /app/dist ./dist
+
 EXPOSE 3000
 
-# Start the application
-CMD ["npm", "start"]
+CMD ["serve", "-s", "dist"]
+
+## without serve and build
+# FROM node:20-alpine
+# WORKDIR /app
+# COPY . .
+# RUN npm install
+# RUN npm run build
+# EXPOSE 3000
+# CMD ["npm", "start"]
